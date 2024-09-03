@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emotion Graph with Marker Control</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f0f0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    canvas {
+      width: 100%;
+      height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Emotion Over Time</h1>
+    <canvas id="emotionGraph"></canvas>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.0.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script>
+    const ctx = document.getElementById('emotionGraph').getContext('2d');
+    const data = [
+      { time: 0, emotion: 'Disbelief', value: 1 },
+      { time: 1, emotion: 'Hope', value: 2 },
+      { time: 2, emotion: 'Optimism', value: 4 },
+      { time: 3, emotion: 'Belief', value: 6 },
+      { time: 4, emotion: 'Thrill', value: 8 },
+      { time: 5, emotion: 'Euphoria', value: 10 },
+      { time: 6, emotion: 'Complacency', value: 7 },
+      { time: 7, emotion: 'Anxiety', value: 4 },
+      { time: 8, emotion: 'Denial', value: 2 },
+      { time: 9, emotion: 'Panic', value: 1 },
+      { time: 10, emotion: 'Capitulation', value: 0 },
+      { time: 11, emotion: 'Anger', value: 1 },
+      { time: 12, emotion: 'Depression', value: 0.5 },
+      { time: 13, emotion: 'Disbelief', value: 1 }
+    ];
+
+    const labels = data.map(point => point.emotion);
+    const values = data.map(point => point.value);
+
+    let markerIndex = 0; // Start with the first emotion
+
+    const chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Emotion Intensity',
+          data: values,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: true,
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Emotions'
+            },
+            ticks: {
+              autoSkip: false
+            }
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Intensity'
+            },
+            min: 0,
+            max: 10
+          }
+        },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top'
+          },
+          annotation: {
+            annotations: {
+              marker: {
+                type: 'point',
+                xValue: labels[markerIndex],
+                yValue: values[markerIndex],
+                radius: 5,
+                backgroundColor: 'red',
+                borderColor: 'black',
+                borderWidth: 1,
+                label: {
+                  content: 'Marker',
+                  enabled: true,
+                  position: 'top'
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    function moveMarker() {
+      // Update markerIndex and loop back to the start if necessary
+      markerIndex = (markerIndex + 1) % labels.length;
+      chart.options.plugins.annotation.annotations.marker.xValue = labels[markerIndex];
+      chart.options.plugins.annotation.annotations.marker.yValue = values[markerIndex];
+      chart.update();
+    }
+
+    document.addEventListener('keydown', (event) => {
+      if (event.code === 'Space') {
+        event.preventDefault(); // Prevent default spacebar scroll behavior
+        moveMarker();
+      }
+    });
+
+    // Initialize marker at the start position (x0, y0)
+    chart.options.plugins.annotation.annotations.marker.xValue = labels[0];
+    chart.options.plugins.annotation.annotations.marker.yValue = values[0];
+    chart.update();
+  </script>
+</body>
+</html>
